@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FinancialTransaction {
+  id          Int      @id @default(autoincrement())
+  description String
+  amount      Decimal  @db.Decimal(10, 2)
+  type        String   // INCOME, EXPENSE
+  status      String   // PENDING, PAID
+  dueDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  supplierId  Int?
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  customerId  Int?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  projectId   Int?
+  project     Project? @relation(fields: [projectId], references: [id])
+  category    String?  // 'MÃO_DE_OBRA', 'MATERIAIS', 'SERVIÇOS', 'OUTROS'
+  quantity    Decimal? @db.Decimal(10, 2)
+  unit        String?
+}
+
+model Supplier {
+  id          Int      @id @default(autoincrement())
+  name        String
+  ruc         String?
+  phone       String?
+  email       String?
+  category    String?
+  transactions FinancialTransaction[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  city        String?
+  location    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  customerId  Int?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  budgets     ProjectBudget[]
+  transactions FinancialTransaction[]
+  stages      ProjectStage[]
+  workLogs    WorkLog[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProjectStage {
+  id               Int      @id @default(autoincrement())
+  name             String
+  startDatePlanned DateTime?
+  endDatePlanned   DateTime?
+  startDateReal    DateTime?
+  endDateReal      DateTime?
+  status           String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  projectId        Int
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ProjectBudget {
+  id          Int      @id @default(autoincrement())
+  category    String   // 'MÃO_DE_OBRA', 'MATERIAIS', 'SERVIÇOS', 'OUTROS'
+  amount      Decimal  @db.Decimal(10, 2)
+  description String?
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  name        String
+  ci          String?
+  phone       String?
+  email       String?
+  transactions FinancialTransaction[]
+  projects    Project[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model Worker {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String?
+  hourlyRate  Decimal  @db.Decimal(10, 2)
+  phone       String?
+  active      Boolean  @default(true)
+  workLogs    WorkLog[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WorkLog {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  hours       Decimal  @db.Decimal(10, 2)
+  description String?
+  
+  workerId    Int
+  worker      Worker   @relation(fields: [workerId], references: [id])
+  
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
