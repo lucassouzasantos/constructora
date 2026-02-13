@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Search, Building, MapPin, Calendar, Trash2, Edit } from 'lucide-react';
+import CurrencyInput from '../components/CurrencyInput';
 
 interface Project {
     id: number;
@@ -11,6 +12,8 @@ interface Project {
     endDate: string;
     customer?: { id: number, name: string };
     customerId?: number;
+    totalArea?: number;
+    salesValue?: number;
 }
 
 interface Customer {
@@ -30,7 +33,9 @@ export default function ProjectsPage() {
         location: '',
         startDate: '',
         endDate: '',
-        customerId: ''
+        customerId: '',
+        totalArea: '',
+        salesValue: ''
     });
 
     useEffect(() => {
@@ -69,11 +74,22 @@ export default function ProjectsPage() {
                 location: project.location || '',
                 startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
                 endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '',
-                customerId: project.customer?.id?.toString() || project.customerId?.toString() || ''
+                customerId: project.customer?.id?.toString() || project.customerId?.toString() || '',
+                totalArea: project.totalArea?.toString() || '',
+                salesValue: project.salesValue?.toString() || ''
             });
         } else {
             setEditingProject(null);
-            setFormData({ name: '', city: '', location: '', startDate: '', endDate: '', customerId: '' });
+            setFormData({
+                name: '',
+                city: '',
+                location: '',
+                startDate: '',
+                endDate: '',
+                customerId: '',
+                totalArea: '',
+                salesValue: ''
+            });
         }
         setIsModalOpen(true);
     };
@@ -86,20 +102,35 @@ export default function ProjectsPage() {
                 : 'http://localhost:3000/projects';
 
             const method = editingProject ? 'PATCH' : 'POST';
+            const payload = {
+                ...formData,
+                customerId: formData.customerId ? Number(formData.customerId) : null,
+                totalArea: formData.totalArea ? Number(formData.totalArea) : null,
+                salesValue: formData.salesValue ? Number(formData.salesValue) : null,
+                startDate: formData.startDate || null,
+                endDate: formData.endDate || null,
+            };
 
-            await fetch(url, {
+            console.log('Sending payload:', payload);
+
+            const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    customerId: formData.customerId ? Number(formData.customerId) : null
-                }),
+                body: JSON.stringify(payload),
             });
+            console.log('Project saved:', response);
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Server error:', errorData);
+                alert(`Erro ao salvar obra: ${JSON.stringify(errorData)}`);
+                return;
+            }
             setIsModalOpen(false);
             setEditingProject(null);
             fetchProjects();
         } catch (error) {
             console.error('Error saving project:', error);
+            alert(`Erro ao salvar obra: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         }
     };
 
@@ -264,6 +295,27 @@ export default function ProjectsPage() {
                                         <option key={c.id} value={c.id}>{c.name}</option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Área Total (m²)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all"
+                                        value={formData.totalArea}
+                                        onChange={e => setFormData({ ...formData, totalArea: e.target.value })}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Valor do Contrato</label>
+                                    <CurrencyInput
+                                        value={formData.salesValue}
+                                        onValueChange={(value) => setFormData({ ...formData, salesValue: value })}
+                                        placeholder="0"
+                                    />
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>

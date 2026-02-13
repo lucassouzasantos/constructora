@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 
-interface CurrencyInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface CurrencyInputProps {
     value: string | number;
     onValueChange: (value: string) => void;
+    placeholder?: string;
+    className?: string;
 }
 
-export default function CurrencyInput({ value, onValueChange, className, ...props }: CurrencyInputProps) {
+export default function CurrencyInput({ value, onValueChange, placeholder, className }: CurrencyInputProps) {
     const [displayValue, setDisplayValue] = useState('');
 
     useEffect(() => {
@@ -39,11 +41,11 @@ export default function CurrencyInput({ value, onValueChange, className, ...prop
 
     return (
         <input
-            {...props}
             type="text"
             value={displayValue}
             onChange={handleChange}
-            className={className}
+            placeholder={placeholder}
+            className={className || "w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all"}
         />
     );
 }

@@ -24,6 +24,8 @@ interface Project {
     location: string;
     customer?: { name: string };
     stages?: ProjectStage[];
+    totalArea?: number;
+    salesValue?: number;
 }
 
 interface Worker {
@@ -408,6 +410,26 @@ export default function ProjectDetailsPage() {
         ];
     };
 
+    const calculateFinancials = () => {
+        const totalExpenses = expenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
+        const totalLabor = workLogs.reduce((acc, curr) => acc + (Number(curr.hours) * Number(curr.worker.hourlyRate)), 0);
+        const totalCost = totalExpenses + totalLabor;
+
+        const totalBudget = budgets.reduce((acc, curr) => acc + Number(curr.amount), 0);
+        const budgetDeviation = totalCost - totalBudget;
+
+        const salesValue = Number(project?.salesValue || 0);
+        const margin = salesValue > 0 ? ((salesValue - totalCost) / salesValue) * 100 : 0;
+        const profit = salesValue - totalCost;
+
+        const totalArea = Number(project?.totalArea || 0);
+        const costPerM2 = totalArea > 0 ? totalCost / totalArea : 0;
+
+        return { totalCost, totalBudget, budgetDeviation, margin, profit, costPerM2, salesValue, totalArea };
+    };
+
+    const financials = calculateFinancials();
+
     if (!project) return <div>Carregando...</div>;
 
     return (
@@ -427,8 +449,57 @@ export default function ProjectDetailsPage() {
 
 
 
+            {/* Dashboard Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p className="text-sm text-slate-500 mb-1">Margem da Obra</p>
+                    <div className="flex items-center gap-2">
+                        <span className={`text-2xl font-bold ${financials.margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {financials.margin.toFixed(1)}%
+                        </span>
+                        {financials.salesValue > 0 && (
+                            <span className="text-xs text-slate-400">
+                                ({formatCurrency(financials.profit)})
+                            </span>
+                        )}
+                    </div>
+                </div>
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p className="text-sm text-slate-500 mb-1">% Executado</p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-slate-800">
+                            {stages.length > 0
+                                ? Math.round((stages.filter(s => s.status === 'COMPLETED').length / stages.length) * 100)
+                                : 0}%
+                        </span>
+                    </div>
+                </div>
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p className="text-sm text-slate-500 mb-1">Desvio Orçamentário</p>
+                    <div className="flex items-center gap-2">
+                        <span className={`text-2xl font-bold ${financials.budgetDeviation <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {formatCurrency(financials.budgetDeviation)}
+                        </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">
+                        Previsto: {formatCurrency(financials.totalBudget)}
+                    </p>
+                </div>
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p className="text-sm text-slate-500 mb-1">Custo por m²</p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold text-slate-800">
+                            {formatCurrency(financials.costPerM2)}
+                        </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">
+                        Área: {financials.totalArea} m²
+                    </p>
+                </div>
+            </div>
+
             {/* Materials and Services Section */}
-            <div className="lg:col-span-3 space-y-6 pt-4 border-t border-slate-100">
+            <div className="w-full space-y-6 pt-4 border-t border-slate-100">
                 <div className="flex items-center gap-4 bg-slate-50 p-1 rounded-xl w-fit">
                     <button
                         onClick={() => setActiveTab('schedule')}
@@ -756,7 +827,7 @@ export default function ProjectDetailsPage() {
 
 
                 {/* Budget Section */}
-                <div className="space-y-4">
+                <div className="space-y-4 mt-16 pt-8 border-t-2 border-slate-100">
                     <div className="flex items-center justify-between">
                         <h3 className="font-semibold text-lg text-slate-700">Orçamento Previsto vs. Realizado</h3>
                         <button

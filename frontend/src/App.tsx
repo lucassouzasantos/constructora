@@ -7,6 +7,9 @@ import FinancePage from './pages/FinancePage';
 import RegistersPage from './pages/RegistersPage';
 import ReportsPage from './pages/ReportsPage';
 import TeamPage from './pages/TeamPage';
+import SuppliesPage from './pages/SuppliesPage';
+import ContractsPage from './pages/ContractsPage';
+import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -25,6 +28,9 @@ function App() {
             <Route path="/finance" element={<FinancePage />} />
             <Route path="/team" element={<TeamPage />} />
             <Route path="/registers" element={<RegistersPage />} />
+            <Route path="/supplies" element={<SuppliesPage />} />
+            <Route path="/contracts" element={<ContractsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Route>
         </Route>

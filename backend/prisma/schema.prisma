@@ -35,6 +35,8 @@ model FinancialTransaction {
   category    String?  // 'MÃO_DE_OBRA', 'MATERIAIS', 'SERVIÇOS', 'OUTROS'
   quantity    Decimal? @db.Decimal(10, 2)
   unit        String?
+  costCenterId Int?
+  costCenter   CostCenter? @relation(fields: [costCenterId], references: [id])
 }
 
 model Supplier {
@@ -54,6 +56,8 @@ model Project {
   name        String
   city        String?
   location    String?
+  totalArea   Decimal? @db.Decimal(10, 2) // m2
+  salesValue  Decimal? @db.Decimal(15, 2) // Contract/Sale value
   startDate   DateTime?
   endDate     DateTime?
   customerId  Int?
@@ -128,6 +132,16 @@ model WorkLog {
   projectId   Int
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CostCenter {
+  id          Int      @id @default(autoincrement())
+  name        String
+  code        String?
+  active      Boolean  @default(true)
+  transactions FinancialTransaction[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

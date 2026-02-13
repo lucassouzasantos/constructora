@@ -8,7 +8,7 @@ export class FinanceService {
   constructor(private prisma: PrismaService) { }
 
   create(createFinanceDto: CreateFinanceDto) {
-    const { dueDate, supplierId, customerId, projectId, category, quantity, unit, ...rest } = createFinanceDto;
+    const { dueDate, supplierId, customerId, projectId, costCenterId, category, quantity, unit, ...rest } = createFinanceDto;
     return this.prisma.financialTransaction.create({
       data: {
         ...rest,
@@ -19,6 +19,7 @@ export class FinanceService {
         ...(supplierId && { supplier: { connect: { id: Number(supplierId) } } }),
         ...(customerId && { customer: { connect: { id: Number(customerId) } } }),
         ...(projectId && { project: { connect: { id: Number(projectId) } } }),
+        ...(costCenterId && { costCenter: { connect: { id: Number(costCenterId) } } }),
       },
       include: {
         supplier: true,

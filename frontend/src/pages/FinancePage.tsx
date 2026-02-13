@@ -1,7 +1,8 @@
 import { formatCurrency } from '../utils/format';
 import { useState, useEffect } from 'react';
-import { Plus, Search, ArrowUpCircle, ArrowDownCircle, Activity, Pencil, Trash, CheckCircle } from 'lucide-react';
+import { Plus, Search, ArrowUpCircle, ArrowDownCircle, Activity, Pencil, Trash, CheckCircle, Target } from 'lucide-react';
 import TransactionModal from '../components/TransactionModal';
+import CostCentersManager from '../components/CostCentersManager';
 
 interface Transaction {
     id: number;
@@ -27,7 +28,7 @@ interface CashFlowItem {
 }
 
 export default function FinancePage() {
-    const [activeTab, setActiveTab] = useState<'INCOME' | 'EXPENSE' | 'CASH_FLOW'>('EXPENSE');
+    const [activeTab, setActiveTab] = useState<'INCOME' | 'EXPENSE' | 'CASH_FLOW' | 'COST_CENTER'>('EXPENSE');
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,13 +186,26 @@ export default function FinancePage() {
         setIsModalOpen(true);
     };
 
+    const handleLaunchExpense = (costCenterId: number) => {
+        setEditingTransaction({
+            costCenterId,
+            type: 'EXPENSE',
+            // Default values
+            description: '',
+            amount: '',
+            status: 'PENDING',
+            dueDate: new Date().toISOString().split('T')[0]
+        } as any);
+        setIsModalOpen(true);
+    };
+
     const filteredTransactions = transactions.filter(t => t.type === activeTab);
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-slate-800">Financeiro</h2>
-                {activeTab !== 'CASH_FLOW' && (
+                {(activeTab === 'INCOME' || activeTab === 'EXPENSE') && (
                     <button
                         onClick={openCreateModal}
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
@@ -234,10 +248,20 @@ export default function FinancePage() {
                     <Activity className="w-4 h-4" />
                     Fluxo de Caixa
                 </button>
+                <button
+                    onClick={() => setActiveTab('COST_CENTER')}
+                    className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'COST_CENTER'
+                        ? 'border-purple-500 text-purple-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                        }`}
+                >
+                    <Target className="w-4 h-4" />
+                    Centros de Custo
+                </button>
             </div>
 
             {/* Content */}
-            {activeTab === 'CASH_FLOW' ? (
+            {activeTab === 'CASH_FLOW' && (
                 <div className="space-y-6">
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -312,7 +336,9 @@ export default function FinancePage() {
                         </div>
                     </div>
                 </div>
-            ) : (
+            )}
+
+            {(activeTab === 'INCOME' || activeTab === 'EXPENSE') && (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="p-4 border-b border-slate-100 flex gap-4">
                         <div className="relative flex-1 max-w-md">
@@ -400,15 +426,22 @@ export default function FinancePage() {
                         </table>
                     </div>
                 </div>
-            )}
+            )
+            }
+
+            {
+                activeTab === 'COST_CENTER' && (
+                    <CostCentersManager onLaunchExpense={handleLaunchExpense} />
+                )
+            }
 
             <TransactionModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
-                type={activeTab !== 'CASH_FLOW' ? activeTab : 'EXPENSE'}
+                type={(activeTab === 'INCOME' || activeTab === 'EXPENSE') ? activeTab : 'EXPENSE'}
                 initialData={editingTransaction}
             />
-        </div>
+        </div >
     );
 }

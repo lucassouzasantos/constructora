@@ -1,4 +1,4 @@
-import { Home, Users, Building, LogOut, PieChart, Contact, ArrowUpCircle } from 'lucide-react';
+import { Home, Users, Building, LogOut, PieChart, Contact, ArrowUpCircle, Package, FileText, Settings } from 'lucide-react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 
 export default function Layout() {
@@ -16,10 +16,12 @@ export default function Layout() {
     const navItems = [
         { path: '/', icon: Home, label: 'Dashboard' },
         { path: '/projects', icon: Building, label: 'Obras' },
-        { path: '/team', icon: Users, label: 'Equipe' },
-        { path: '/registers', icon: Contact, label: 'Cadastros' },
         { path: '/finance', icon: ArrowUpCircle, label: 'Financeiro' },
+        { path: '/supplies', icon: Package, label: 'Suprimentos' },
+        { path: '/team', icon: Users, label: 'Equipe' },
+        { path: '/contracts', icon: FileText, label: 'Contratos' },
         { path: '/reports', icon: PieChart, label: 'Relatórios' },
+        { path: '/admin', icon: Settings, label: 'Administração' },
     ];
 
     return (

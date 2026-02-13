@@ -24,12 +24,15 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, initia
     // Project and Category fields
     const [selectedProjectId, setSelectedProjectId] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedCostCenterId, setSelectedCostCenterId] = useState('');
     const [projects, setProjects] = useState<any[]>([]);
+    const [costCenters, setCostCenters] = useState<any[]>([]);
 
     useEffect(() => {
         if (isOpen) {
             fetchEntities();
             fetchProjects();
+            fetchCostCenters();
 
             if (initialData) {
                 setDescription(initialData.description || '');
@@ -45,6 +48,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, initia
                 // Set Project and Category
                 setSelectedProjectId(initialData.projectId ? String(initialData.projectId) : '');
                 setSelectedCategory(initialData.category || '');
+                setSelectedCostCenterId(initialData.costCenterId ? String(initialData.costCenterId) : '');
             } else {
                 // Reset if opening in create mode
                 setDescription('');
@@ -54,6 +58,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, initia
                 setSelectedEntityId('');
                 setSelectedProjectId('');
                 setSelectedCategory('');
+                setSelectedCostCenterId('');
             }
         }
     }, [isOpen, type, initialData]);
@@ -80,6 +85,18 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, initia
             }
         } catch (error) {
             console.error('Error fetching projects:', error);
+        }
+    };
+
+    const fetchCostCenters = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/cost-centers');
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                setCostCenters(data.filter((cc: any) => cc.active));
+            }
+        } catch (error) {
+            console.error('Error fetching cost centers:', error);
         }
     };
 
@@ -119,6 +136,12 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, initia
             payload.category = selectedCategory;
         } else {
             payload.category = null;
+        }
+
+        if (selectedCostCenterId) {
+            payload.costCenterId = parseInt(selectedCostCenterId);
+        } else {
+            payload.costCenterId = null;
         }
 
         await onSave(payload);
@@ -245,6 +268,22 @@ export default function TransactionModal({ isOpen, onClose, onSave, type, initia
                                 </div>
                             )}
                         </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 mt-2">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Centro de Custos (Opcional)</label>
+                        <select
+                            value={selectedCostCenterId}
+                            onChange={(e) => setSelectedCostCenterId(e.target.value)}
+                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all bg-white"
+                        >
+                            <option value="">Selecione um centro de custo...</option>
+                            {costCenters.map(cc => (
+                                <option key={cc.id} value={cc.id}>
+                                    {cc.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="flex gap-3 mt-8">

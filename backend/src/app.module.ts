@@ -12,9 +12,10 @@ import { WorkersModule } from './workers/workers.module';
 import { WorkLogsModule } from './work-logs/work-logs.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { CostCentersModule } from './cost-centers/cost-centers.module';
 
 @Module({
-  imports: [FinanceModule, SuppliersModule, CustomersModule, ProjectsModule, ProjectStagesModule, ProjectBudgetsModule, WorkersModule, WorkLogsModule, AuthModule, UsersModule],
+  imports: [FinanceModule, SuppliersModule, CustomersModule, ProjectsModule, ProjectStagesModule, ProjectBudgetsModule, WorkersModule, WorkLogsModule, AuthModule, UsersModule, CostCentersModule],
   controllers: [AppController],
   providers: [AppService],
 })

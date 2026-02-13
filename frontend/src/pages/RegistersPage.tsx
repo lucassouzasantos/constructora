@@ -18,8 +18,14 @@ interface Customer {
     email: string;
 }
 
-export default function RegistersPage() {
-    const [activeTab, setActiveTab] = useState<'SUPPLIERS' | 'CUSTOMERS'>('SUPPLIERS');
+interface RegistersPageProps {
+    type?: 'ALL' | 'SUPPLIERS' | 'CUSTOMERS';
+}
+
+export default function RegistersPage({ type = 'ALL' }: RegistersPageProps) {
+    const [activeTab, setActiveTab] = useState<'SUPPLIERS' | 'CUSTOMERS'>(
+        type === 'CUSTOMERS' ? 'CUSTOMERS' : 'SUPPLIERS'
+    );
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +33,12 @@ export default function RegistersPage() {
     // Form State
     const [formData, setFormData] = useState<any>({});
     const [editingId, setEditingId] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (type !== 'ALL') {
+            setActiveTab(type);
+        }
+    }, [type]);
 
     useEffect(() => {
         fetchItems();
@@ -101,7 +113,9 @@ export default function RegistersPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-slate-800">Cadastros</h2>
+                <h2 className="text-2xl font-bold text-slate-800">
+                    {type === 'ALL' ? 'Cadastros' : type === 'SUPPLIERS' ? 'Suprimentos (Fornecedores)' : 'Administração (Clientes)'}
+                </h2>
                 <button
                     onClick={openNew}
                     className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
@@ -111,29 +125,31 @@ export default function RegistersPage() {
                 </button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-slate-200">
-                <button
-                    onClick={() => setActiveTab('SUPPLIERS')}
-                    className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'SUPPLIERS'
-                        ? 'border-orange-500 text-orange-600'
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                        }`}
-                >
-                    <Building className="w-4 h-4" />
-                    Fornecedores
-                </button>
-                <button
-                    onClick={() => setActiveTab('CUSTOMERS')}
-                    className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'CUSTOMERS'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                        }`}
-                >
-                    <Users className="w-4 h-4" />
-                    Clientes
-                </button>
-            </div>
+            {/* Tabs - Only show if type is ALL */}
+            {type === 'ALL' && (
+                <div className="flex border-b border-slate-200">
+                    <button
+                        onClick={() => setActiveTab('SUPPLIERS')}
+                        className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'SUPPLIERS'
+                            ? 'border-orange-500 text-orange-600'
+                            : 'border-transparent text-slate-500 hover:text-slate-700'
+                            }`}
+                    >
+                        <Building className="w-4 h-4" />
+                        Fornecedores
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('CUSTOMERS')}
+                        className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'CUSTOMERS'
+                            ? 'border-green-500 text-green-600'
+                            : 'border-transparent text-slate-500 hover:text-slate-700'
+                            }`}
+                    >
+                        <Users className="w-4 h-4" />
+                        Clientes
+                    </button>
+                </div>
+            )}
 
             {/* List */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

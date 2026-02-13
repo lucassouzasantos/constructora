@@ -16,6 +16,8 @@ export class ProjectsService {
         startDate: createProjectDto.startDate ? new Date(createProjectDto.startDate) : undefined,
         endDate: createProjectDto.endDate ? new Date(createProjectDto.endDate) : undefined,
         customerId: createProjectDto.customerId ? Number(createProjectDto.customerId) : null,
+        totalArea: createProjectDto.totalArea ? Number(createProjectDto.totalArea) : null,
+        salesValue: createProjectDto.salesValue ? Number(createProjectDto.salesValue) : null,
       },
     });
   }
@@ -44,6 +46,8 @@ export class ProjectsService {
         startDate: updateProjectDto.startDate ? new Date(updateProjectDto.startDate) : undefined,
         endDate: updateProjectDto.endDate ? new Date(updateProjectDto.endDate) : undefined,
         customerId: updateProjectDto.customerId ? Number(updateProjectDto.customerId) : null,
+        totalArea: updateProjectDto.totalArea ? Number(updateProjectDto.totalArea) : null,
+        salesValue: updateProjectDto.salesValue ? Number(updateProjectDto.salesValue) : null,
       },
     });
   }
