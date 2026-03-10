@@ -13,6 +13,10 @@ export default function Layout() {
         navigate('/login');
     };
 
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const isAdmin = user?.role === 'ADMIN';
+
     const navItems = [
         { path: '/', icon: Home, label: 'Dashboard' },
         { path: '/projects', icon: Building, label: 'Obras' },
@@ -22,7 +26,7 @@ export default function Layout() {
         { path: '/contracts', icon: FileText, label: 'Contratos' },
         { path: '/customers', icon: Contact, label: 'Clientes' },
         { path: '/reports', icon: PieChart, label: 'Relatórios' },
-        { path: '/admin', icon: Settings, label: 'Administração' },
+        ...(isAdmin ? [{ path: '/admin', icon: Settings, label: 'Administração' }] : [])
     ];
 
     return (
@@ -72,8 +76,12 @@ export default function Layout() {
                         {navItems.find(i => isActive(i.path))?.label || 'Visão Geral'}
                     </h2>
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-200 rounded-full border-2 border-white shadow-sm overflow-hidden">
-                            <img src="https://ui-avatars.com/api/?name=Admin+User&background=random" alt="Profile" />
+                        <div className="flex flex-col items-end mr-3 hidden sm:flex">
+                            <span className="text-sm font-semibold text-slate-800">{user?.name || 'Usuário'}</span>
+                            <span className="text-xs text-slate-500">{user?.role === 'ADMIN' ? 'Administrador' : 'Membro'}</span>
+                        </div>
+                        <div className="w-10 h-10 bg-slate-200 rounded-full border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
+                            <span className="font-bold text-slate-500">{user?.name?.charAt(0) || 'U'}</span>
                         </div>
                     </div>
                 </header>
