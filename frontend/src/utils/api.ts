@@ -9,11 +9,17 @@ interface RequestOptions extends RequestInit {
 async function fetchWrapper<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { skipGlobalErrorToast, ...customConfig } = options;
 
+    const token = localStorage.getItem('token');
+
     // Add default headers unless overridden
-    const headers = {
+    const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        ...customConfig.headers,
+        ...customConfig.headers as any,
     };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
 
     const config: RequestInit = {
         ...customConfig,
@@ -22,6 +28,13 @@ async function fetchWrapper<T>(endpoint: string, options: RequestOptions = {}): 
 
     try {
         const response = await fetch(`${BASE_URL}${endpoint}`, config);
+
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+            throw new Error('Sessão expirada. Por favor, faça login novamente.');
+        }
 
         // Handle no content
         if (response.status === 204) {

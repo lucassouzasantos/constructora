@@ -20,7 +20,7 @@ model User {
 model FinancialTransaction {
   id          Int      @id @default(autoincrement())
   description String
-  amount      Decimal  @db.Decimal(10, 2)
+  amount      Decimal  @db.Decimal(15, 2)
   type        String // INCOME, EXPENSE
   status      String // PENDING, PAID
   dueDate     DateTime
@@ -91,7 +91,7 @@ model ProjectStage {
 model ProjectBudget {
   id          Int      @id @default(autoincrement())
   category    String // 'MÃO_DE_OBRA', 'MATERIAIS', 'SERVIÇOS', 'OUTROS'
-  amount      Decimal  @db.Decimal(10, 2)
+  amount      Decimal  @db.Decimal(15, 2)
   description String?
   projectId   Int
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -109,6 +109,7 @@ model Customer {
   transactions FinancialTransaction[]
   projects     Project[]
   contracts    Contract[]
+  quotes       Quote[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
 }
@@ -117,7 +118,7 @@ model Worker {
   id         Int       @id @default(autoincrement())
   name       String
   role       String?
-  dailyRate  Decimal   @db.Decimal(10, 2)
+  dailyRate  Decimal   @db.Decimal(15, 2)
   phone      String?
   active     Boolean   @default(true)
   workLogs   WorkLog[]
@@ -158,7 +159,7 @@ model InventoryItem {
   quantity    Decimal  @db.Decimal(10, 2)
   unit        String // 'Un', 'Kg', 'L', 'Cx', 'M'
   minQuantity Decimal? @db.Decimal(10, 2)
-  unitValue   Decimal? @db.Decimal(10, 2) // Valor Monetário (Price)
+  unitValue   Decimal  @db.Decimal(15, 2) // Valor Monetário (Price)
 
   projectId Int?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
@@ -181,4 +182,62 @@ model Contract {
 
   customerId  Int?
   customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+}
+
+model Quote {
+  id          Int      @id @default(autoincrement())
+  title       String   
+  customerId  Int?
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  address     String?
+  city        String?
+  type        String   
+  totalArea   Decimal?  @db.Decimal(10, 2)
+  date        DateTime @default(now())
+  responsible String?
+  status      String @default("DRAFT") // DRAFT, SENT, APPROVED, REJECTED
+  
+  paymentTerms     String?
+  estimatedTime    String?
+  includedItems    String?
+  excludedItems    String?
+  validityDays     Int? @default(15)
+
+  marginPercentage Decimal? @db.Decimal(5, 2)
+  
+  stages        QuoteStage[]
+  indirectCosts QuoteIndirectCost[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model QuoteStage {
+  id          Int      @id @default(autoincrement())
+  name        String   
+  description String?  
+  
+  quoteId     Int
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  items       QuoteItem[]
+}
+
+model QuoteItem {
+  id          Int      @id @default(autoincrement())
+  description String
+  unit        String   
+  quantity    Decimal  @db.Decimal(10, 2)
+  unitCost  Decimal @db.Decimal(15, 2)
+  
+  stageId     Int
+  stage       QuoteStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+}
+
+model QuoteIndirectCost {
+  id          Int      @id @default(autoincrement())
+  description String   
+  amount      Decimal @db.Decimal(15, 2)
+  
+  quoteId     Int
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 }

@@ -18,6 +18,7 @@ import { ContractsModule } from './contracts/contracts.module';
 
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { QuotesModule } from './quotes/quotes.module';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { join } from 'path';
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
-    FinanceModule, SuppliersModule, CustomersModule, ProjectsModule, ProjectStagesModule, ProjectBudgetsModule, WorkersModule, WorkLogsModule, AuthModule, UsersModule, CostCentersModule, InventoryModule, ContractsModule
+    FinanceModule, SuppliersModule, CustomersModule, ProjectsModule, ProjectStagesModule, ProjectBudgetsModule, WorkersModule, WorkLogsModule, AuthModule, UsersModule, CostCentersModule, InventoryModule, ContractsModule, QuotesModule
   ],
   controllers: [AppController],
   providers: [AppService],

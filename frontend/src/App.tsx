@@ -11,6 +11,8 @@ import TeamPage from './pages/TeamPage';
 import SuppliesPage from './pages/SuppliesPage';
 import CustomersPage from './pages/CustomersPage'; // Added this line
 import ContractsPage from './pages/ContractsPage';
+import QuotesPage from './pages/QuotesPage';
+import QuoteEditorPage from './pages/QuoteEditorPage';
 import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -34,6 +36,9 @@ function App() {
             <Route path="/supplies" element={<SuppliesPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/customers" element={<CustomersPage />} />
+            <Route path="/quotes" element={<QuotesPage />} />
+            <Route path="/quotes/new" element={<QuoteEditorPage />} />
+            <Route path="/quotes/:id" element={<QuoteEditorPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Route>
